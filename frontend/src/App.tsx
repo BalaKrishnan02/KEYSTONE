@@ -21,48 +21,11 @@ import CustomerPortal from './pages/CustomerPortal';
 import CustomerRequests from './pages/CustomerRequests';
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
-  const { user, isAuthenticated, loginAs } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   
-  useEffect(() => {
-    if (!isAuthenticated) {
-      // Default auto-login as Manager to ensure direct link accessibility
-      loginAs('admin@vertexa.com', 'password123', {
-        id: 1,
-        name: 'Admin Manager',
-        email: 'admin@vertexa.com',
-        role: 'MANAGER',
-      });
-    }
-  }, [isAuthenticated, loginAs]);
-
-  // If page requires a specific role and current role is not in the list, auto-switch to suitable role
-  useEffect(() => {
-    if (roles && user && !roles.includes(user.role)) {
-      if (roles.includes('CUSTOMER')) {
-        loginAs('john@apex.com', 'password123', {
-          id: 5,
-          name: 'John Sterling',
-          email: 'john@apex.com',
-          role: 'CUSTOMER',
-          customerId: 1,
-        });
-      } else if (roles.includes('TECHNICIAN')) {
-        loginAs('mike@vertexa.com', 'password123', {
-          id: 3,
-          name: 'Mike Ramirez',
-          email: 'mike@vertexa.com',
-          role: 'TECHNICIAN',
-        });
-      } else {
-        loginAs('admin@vertexa.com', 'password123', {
-          id: 1,
-          name: 'Admin Manager',
-          email: 'admin@vertexa.com',
-          role: 'MANAGER',
-        });
-      }
-    }
-  }, [roles, user, loginAs]);
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
 
   return <Layout>{children}</Layout>;
 }

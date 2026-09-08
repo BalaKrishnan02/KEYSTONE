@@ -1,5 +1,6 @@
 import { useState, useEffect, ReactNode } from 'react';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
   LayoutDashboard,
   Users,
@@ -70,9 +71,16 @@ const roleBadgeStyle = (role: string) => {
 export default function Layout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+    toast.success('Logged out');
+  };
 
   useEffect(() => {
     const fetchCount = async () => {
@@ -159,7 +167,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           </div>
         )}
         <button
-          onClick={logout}
+          onClick={handleLogout}
           className={`sidebar-nav-item-inactive mt-1 w-full text-danger-400 hover:text-danger-300 hover:bg-danger-600/10 ${collapsed ? 'justify-center' : ''}`}
           title={collapsed ? 'Logout' : undefined}
           aria-label="Logout"

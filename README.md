@@ -1,5 +1,4 @@
-# KEYSTONE
-# Plan to Run Keystone Application Locally
+# KEYSTONE# Plan to Run Keystone Application Locally
 
 ## Context & Findings
 1. The user's system does not have Docker or PostgreSQL installed.

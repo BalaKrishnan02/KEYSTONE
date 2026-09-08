@@ -29,17 +29,18 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
+  { to: '/', label: 'Navigation Hub', icon: <Home size={20} />, roles: ['ALL'] },
   { to: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, roles: ['MANAGER', 'DISPATCHER'] },
+  { to: '/work-orders', label: 'Work Orders', icon: <ClipboardList size={20} />, roles: ['MANAGER', 'DISPATCHER', 'TECHNICIAN', 'CUSTOMER'] },
+  { to: '/kanban', label: 'Kanban Board', icon: <Columns3 size={20} />, roles: ['MANAGER', 'DISPATCHER'] },
+  { to: '/my-jobs', label: 'My Jobs', icon: <Wrench size={20} />, roles: ['TECHNICIAN', 'MANAGER'] },
   { to: '/customers', label: 'Customers', icon: <Users size={20} />, roles: ['MANAGER', 'DISPATCHER'] },
   { to: '/sites', label: 'Sites', icon: <Building2 size={20} />, roles: ['MANAGER', 'DISPATCHER'] },
-  { to: '/work-orders', label: 'Work Orders', icon: <ClipboardList size={20} />, roles: ['MANAGER', 'DISPATCHER'] },
-  { to: '/kanban', label: 'Kanban Board', icon: <Columns3 size={20} />, roles: ['MANAGER', 'DISPATCHER'] },
-  { to: '/parts', label: 'Parts', icon: <Package size={20} />, roles: ['MANAGER', 'DISPATCHER', 'TECHNICIAN'] },
+  { to: '/parts', label: 'Parts Inventory', icon: <Package size={20} />, roles: ['MANAGER', 'DISPATCHER', 'TECHNICIAN'] },
   { to: '/reports', label: 'Reports', icon: <BarChart3 size={20} />, roles: ['MANAGER', 'DISPATCHER'] },
-  { to: '/users', label: 'Users', icon: <UserCog size={20} />, roles: ['MANAGER'] },
-  { to: '/my-jobs', label: 'My Jobs', icon: <Wrench size={20} />, roles: ['TECHNICIAN'] },
-  { to: '/portal', label: 'My Requests', icon: <ClipboardList size={20} />, roles: ['CUSTOMER'] },
-  { to: '/portal/requests', label: 'New Request', icon: <Home size={20} />, roles: ['CUSTOMER'] },
+  { to: '/users', label: 'User Management', icon: <UserCog size={20} />, roles: ['MANAGER'] },
+  { to: '/portal', label: 'Customer Portal', icon: <ClipboardList size={20} />, roles: ['CUSTOMER', 'MANAGER'] },
+  { to: '/portal/requests', label: 'New Request', icon: <Building2 size={20} />, roles: ['CUSTOMER', 'MANAGER'] },
 ];
 
 const pageTitles: Record<string, string> = {
@@ -92,7 +93,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     setSidebarOpen(false);
   }, [location.pathname]);
 
-  const filteredItems = navItems.filter((item) => user && item.roles.includes(user.role));
+  const filteredItems = navItems;
   const currentPage = pageTitles[location.pathname] || 'KEYSTONE';
 
   const SidebarContent = () => (

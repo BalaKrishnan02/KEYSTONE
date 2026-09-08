@@ -1,5 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
+import { Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
@@ -19,143 +18,37 @@ import UserManagement from './pages/UserManagement';
 import CustomerPortal from './pages/CustomerPortal';
 import CustomerRequests from './pages/CustomerRequests';
 
-function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
-  const { user, isAuthenticated } = useAuth();
-  
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-  
-  if (roles && user && !roles.includes(user.role)) {
-    return <Navigate to="/" replace />;
-  }
-  
+function PageRoute({ children }: { children: React.ReactNode }) {
   return <Layout>{children}</Layout>;
 }
 
-function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuth();
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
-  return <>{children}</>;
-}
-
 export default function App() {
-  const { user } = useAuth();
-  
-  const getHomeRoute = () => {
-    if (!user) return '/login';
-    switch (user.role) {
-      case 'MANAGER':
-      case 'DISPATCHER':
-        return '/dashboard';
-      case 'TECHNICIAN':
-        return '/my-jobs';
-      case 'CUSTOMER':
-        return '/portal';
-      default:
-        return '/dashboard';
-    }
-  };
-
   return (
     <Routes>
-      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+      {/* Home / Hub page with direct navigation buttons to all pages */}
+      <Route path="/" element={<Login />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
       
-      <Route path="/dashboard" element={
-        <ProtectedRoute roles={['MANAGER', 'DISPATCHER']}>
-          <Dashboard />
-        </ProtectedRoute>
-      } />
+      {/* Direct Page Routes without login barrier */}
+      <Route path="/dashboard" element={<PageRoute><Dashboard /></PageRoute>} />
+      <Route path="/customers" element={<PageRoute><Customers /></PageRoute>} />
+      <Route path="/customers/:id" element={<PageRoute><CustomerDetail /></PageRoute>} />
+      <Route path="/sites" element={<PageRoute><Sites /></PageRoute>} />
+      <Route path="/work-orders" element={<PageRoute><WorkOrders /></PageRoute>} />
+      <Route path="/work-orders/new" element={<PageRoute><CreateWorkOrder /></PageRoute>} />
+      <Route path="/work-orders/:id" element={<PageRoute><WorkOrderDetail /></PageRoute>} />
+      <Route path="/kanban" element={<PageRoute><KanbanBoard /></PageRoute>} />
+      <Route path="/my-jobs" element={<PageRoute><MyJobs /></PageRoute>} />
+      <Route path="/parts" element={<PageRoute><Parts /></PageRoute>} />
+      <Route path="/notifications" element={<PageRoute><Notifications /></PageRoute>} />
+      <Route path="/reports" element={<PageRoute><Reports /></PageRoute>} />
+      <Route path="/users" element={<PageRoute><UserManagement /></PageRoute>} />
+      <Route path="/portal" element={<PageRoute><CustomerPortal /></PageRoute>} />
+      <Route path="/portal/requests" element={<PageRoute><CustomerRequests /></PageRoute>} />
       
-      <Route path="/customers" element={
-        <ProtectedRoute roles={['MANAGER', 'DISPATCHER']}>
-          <Customers />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/customers/:id" element={
-        <ProtectedRoute roles={['MANAGER', 'DISPATCHER']}>
-          <CustomerDetail />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/sites" element={
-        <ProtectedRoute roles={['MANAGER', 'DISPATCHER']}>
-          <Sites />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/work-orders" element={
-        <ProtectedRoute roles={['MANAGER', 'DISPATCHER', 'TECHNICIAN', 'CUSTOMER']}>
-          <WorkOrders />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/work-orders/new" element={
-        <ProtectedRoute roles={['MANAGER', 'DISPATCHER']}>
-          <CreateWorkOrder />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/work-orders/:id" element={
-        <ProtectedRoute roles={['MANAGER', 'DISPATCHER', 'TECHNICIAN', 'CUSTOMER']}>
-          <WorkOrderDetail />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/kanban" element={
-        <ProtectedRoute roles={['MANAGER', 'DISPATCHER']}>
-          <KanbanBoard />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/my-jobs" element={
-        <ProtectedRoute roles={['TECHNICIAN']}>
-          <MyJobs />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/parts" element={
-        <ProtectedRoute roles={['MANAGER', 'DISPATCHER', 'TECHNICIAN']}>
-          <Parts />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/notifications" element={
-        <ProtectedRoute>
-          <Notifications />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/reports" element={
-        <ProtectedRoute roles={['MANAGER', 'DISPATCHER']}>
-          <Reports />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/users" element={
-        <ProtectedRoute roles={['MANAGER']}>
-          <UserManagement />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/portal" element={
-        <ProtectedRoute roles={['CUSTOMER']}>
-          <CustomerPortal />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/portal/requests" element={
-        <ProtectedRoute roles={['CUSTOMER']}>
-          <CustomerRequests />
-        </ProtectedRoute>
-      } />
-      
-      <Route path="/" element={<Navigate to={getHomeRoute()} replace />} />
-      <Route path="*" element={<Navigate to={getHomeRoute()} replace />} />
+      {/* Fallback */}
+      <Route path="*" element={<Login />} />
     </Routes>
   );
 }

@@ -1,398 +1,438 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import {
+  ShieldCheck,
+  Building2,
+  Building,
+  Wrench,
+  Workflow,
   LayoutDashboard,
   ClipboardList,
-  PlusCircle,
   Columns3,
-  Wrench,
   Package,
-  Users,
-  Building2,
   BarChart3,
   UserCog,
   Bell,
-  Home,
+  PlusCircle,
   ArrowRight,
-  Shield,
-  Clock,
-  CheckCircle2,
   Sparkles,
-  Layers,
+  Loader2,
+  HardHat,
+  Compass
 } from 'lucide-react';
-import { useAuth, DEMO_ACCOUNTS } from '../contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 import { UserRole } from '../types';
 
-interface PageLink {
-  to: string;
-  title: string;
-  description: string;
-  badge: string;
-  badgeColor: string;
-  icon: React.ReactNode;
-  iconBg: string;
-  iconColor: string;
-  targetRole?: UserRole;
-  category: 'operations' | 'field' | 'facilities' | 'admin';
+interface PersonaItem {
+  id: string;
+  name: string;
+  subtitle: string;
+  email: string;
+  role: UserRole;
+  customerId?: number;
+  route: string;
+  icon: any;
+  colorTheme: 'blue' | 'emerald' | 'dark' | 'amber' | 'purple';
 }
 
-const PAGES: PageLink[] = [
-  // Operations & Workflows
-  {
-    to: '/dashboard',
-    title: 'Operations Dashboard',
-    description: 'Executive overview, real-time KPI metrics, active jobs, and SLA breach monitors.',
-    badge: 'Core Analytics',
-    badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
-    icon: <LayoutDashboard size={22} />,
-    iconBg: 'bg-blue-500/10 border-blue-500/20',
-    iconColor: 'text-blue-600',
-    targetRole: 'MANAGER',
-    category: 'operations',
-  },
-  {
-    to: '/work-orders',
-    title: 'Work Orders Directory',
-    description: 'Comprehensive table to search, filter, assign, and track all maintenance work orders.',
-    badge: 'Operations',
-    badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-200',
-    icon: <ClipboardList size={22} />,
-    iconBg: 'bg-indigo-500/10 border-indigo-500/20',
-    iconColor: 'text-indigo-600',
-    targetRole: 'MANAGER',
-    category: 'operations',
-  },
-  {
-    to: '/work-orders/new',
-    title: 'Create Work Order',
-    description: 'Dispatch new emergency or scheduled maintenance orders with priority and SLA rules.',
-    badge: 'Quick Action',
-    badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-    icon: <PlusCircle size={22} />,
-    iconBg: 'bg-emerald-500/10 border-emerald-500/20',
-    iconColor: 'text-emerald-600',
-    targetRole: 'DISPATCHER',
-    category: 'operations',
-  },
-  {
-    to: '/kanban',
-    title: 'Kanban Workflow Board',
-    description: 'Visual status pipeline to monitor and drag work orders across progress stages.',
-    badge: 'Interactive',
-    badgeColor: 'bg-purple-50 text-purple-700 border-purple-200',
-    icon: <Columns3 size={22} />,
-    iconBg: 'bg-purple-500/10 border-purple-500/20',
-    iconColor: 'text-purple-600',
-    targetRole: 'DISPATCHER',
-    category: 'operations',
-  },
-
-  // Field Operations & Inventory
-  {
-    to: '/my-jobs',
-    title: 'My Jobs (Technician Portal)',
-    description: 'Field technician mobile-first workspace with step progress, time logger, and parts usage.',
-    badge: 'Field Tech',
-    badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
-    icon: <Wrench size={22} />,
-    iconBg: 'bg-amber-500/10 border-amber-500/20',
-    iconColor: 'text-amber-600',
-    targetRole: 'TECHNICIAN',
-    category: 'field',
-  },
-  {
-    to: '/parts',
-    title: 'Parts & Inventory',
-    description: 'Warehouse catalogue, replacement part stock tracking, costs, and consumption logs.',
-    badge: 'Inventory',
-    badgeColor: 'bg-teal-50 text-teal-700 border-teal-200',
-    icon: <Package size={22} />,
-    iconBg: 'bg-teal-500/10 border-teal-500/20',
-    iconColor: 'text-teal-600',
-    targetRole: 'MANAGER',
-    category: 'field',
-  },
-
-  // Facilities & Client Relations
-  {
-    to: '/customers',
-    title: 'Customer Directory',
-    description: 'Corporate client profiles, contact personnel, service history, and SLA commitments.',
-    badge: 'CRM',
-    badgeColor: 'bg-sky-50 text-sky-700 border-sky-200',
-    icon: <Users size={22} />,
-    iconBg: 'bg-sky-500/10 border-sky-500/20',
-    iconColor: 'text-sky-600',
-    targetRole: 'MANAGER',
-    category: 'facilities',
-  },
-  {
-    to: '/sites',
-    title: 'Facility Sites & Buildings',
-    description: 'Building locations, property addresses, and physical plant management.',
-    badge: 'Properties',
-    badgeColor: 'bg-cyan-50 text-cyan-700 border-cyan-200',
-    icon: <Building2 size={22} />,
-    iconBg: 'bg-cyan-500/10 border-cyan-500/20',
-    iconColor: 'text-cyan-600',
-    targetRole: 'MANAGER',
-    category: 'facilities',
-  },
-  {
-    to: '/portal',
-    title: 'Customer Self-Service Portal',
-    description: 'Dedicated customer view to review ongoing repairs, asset status, and work summaries.',
-    badge: 'Client Portal',
-    badgeColor: 'bg-orange-50 text-orange-700 border-orange-200',
-    icon: <Home size={22} />,
-    iconBg: 'bg-orange-500/10 border-orange-500/20',
-    iconColor: 'text-orange-600',
-    targetRole: 'CUSTOMER',
-    category: 'facilities',
-  },
-  {
-    to: '/portal/requests',
-    title: 'Submit Service Request',
-    description: 'Client form to log new facility issues, maintenance requests, and site incidents.',
-    badge: 'Client Form',
-    badgeColor: 'bg-rose-50 text-rose-700 border-rose-200',
-    icon: <PlusCircle size={22} />,
-    iconBg: 'bg-rose-500/10 border-rose-500/20',
-    iconColor: 'text-rose-600',
-    targetRole: 'CUSTOMER',
-    category: 'facilities',
-  },
-
-  // Analytics & Administration
-  {
-    to: '/reports',
-    title: 'Reports & SLA Compliance',
-    description: 'Detailed reporting on SLA adherence, resolution speed, and technician performance.',
-    badge: 'Reporting',
-    badgeColor: 'bg-violet-50 text-violet-700 border-violet-200',
-    icon: <BarChart3 size={22} />,
-    iconBg: 'bg-violet-500/10 border-violet-500/20',
-    iconColor: 'text-violet-600',
-    targetRole: 'MANAGER',
-    category: 'admin',
-  },
-  {
-    to: '/notifications',
-    title: 'Alerts & Notifications',
-    description: 'System-wide event log, assignment alerts, and proactive SLA escalation warnings.',
-    badge: 'Live Feed',
-    badgeColor: 'bg-pink-50 text-pink-700 border-pink-200',
-    icon: <Bell size={22} />,
-    iconBg: 'bg-pink-500/10 border-pink-500/20',
-    iconColor: 'text-pink-600',
-    targetRole: 'MANAGER',
-    category: 'admin',
-  },
-  {
-    to: '/users',
-    title: 'User & Access Management',
-    description: 'Manage staff accounts, dispatchers, technicians, customers, and role privileges.',
-    badge: 'Administration',
-    badgeColor: 'bg-slate-100 text-slate-700 border-slate-200',
-    icon: <UserCog size={22} />,
-    iconBg: 'bg-slate-500/10 border-slate-500/20',
-    iconColor: 'text-slate-600',
-    targetRole: 'MANAGER',
-    category: 'admin',
-  },
-];
-
-const CATEGORIES = [
-  { id: 'all', label: 'All Pages' },
-  { id: 'operations', label: 'Operations & Work Orders' },
-  { id: 'field', label: 'Field Technician & Inventory' },
-  { id: 'facilities', label: 'Facilities & Client Portal' },
-  { id: 'admin', label: 'Reports & Administration' },
-];
+interface PageLinkItem {
+  name: string;
+  desc: string;
+  route: string;
+  icon: any;
+  defaultRole: UserRole;
+  defaultEmail: string;
+  badge?: string;
+}
 
 export default function Login() {
+  const [activePersona, setActivePersona] = useState<string>('admin');
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const { loginAs } = useAuth();
   const navigate = useNavigate();
-  const { user, switchToRole } = useAuth();
 
-  const handleOpenPage = async (page: PageLink) => {
-    if (page.targetRole && user?.role !== page.targetRole) {
-      await switchToRole(page.targetRole);
+  // Primary Personas matching user screenshot aesthetic
+  const personas: PersonaItem[] = [
+    {
+      id: 'admin',
+      name: 'Admin / Facility Manager',
+      subtitle: 'Full System Control & Management',
+      email: 'admin@vertexa.com',
+      role: 'MANAGER',
+      route: '/dashboard',
+      icon: ShieldCheck,
+      colorTheme: 'blue',
+    },
+    {
+      id: 'apex',
+      name: 'Apex Commercial Towers',
+      subtitle: 'Client Portal & Service Requests',
+      email: 'john@apex.com',
+      role: 'CUSTOMER',
+      customerId: 1,
+      route: '/portal',
+      icon: Building2,
+      colorTheme: 'emerald',
+    },
+    {
+      id: 'dispatcher',
+      name: 'Operations Dispatcher',
+      subtitle: 'Sarah Jenkins • Work Order Dispatch',
+      email: 'sarah@vertexa.com',
+      role: 'DISPATCHER',
+      route: '/kanban',
+      icon: Workflow,
+      colorTheme: 'purple',
+    },
+    {
+      id: 'tech_mike',
+      name: 'Field Tech • Mike Ramirez',
+      subtitle: 'HVAC & Electrical Specialist',
+      email: 'mike@vertexa.com',
+      role: 'TECHNICIAN',
+      route: '/my-jobs',
+      icon: Wrench,
+      colorTheme: 'dark',
+    },
+    {
+      id: 'tech_alex',
+      name: 'Field Tech • Alex Rivera',
+      subtitle: 'Field Operations & Maintenance',
+      email: 'alex@vertexa.com',
+      role: 'TECHNICIAN',
+      route: '/my-jobs',
+      icon: HardHat,
+      colorTheme: 'dark',
+    },
+    {
+      id: 'nexus',
+      name: 'Nexus Innovation Park',
+      subtitle: 'Client Portal • Lab Complex',
+      email: 'elena@nexuspark.com',
+      role: 'CUSTOMER',
+      customerId: 2,
+      route: '/portal/requests',
+      icon: Building,
+      colorTheme: 'dark',
+    },
+  ];
+
+  // Direct Page links to all modules in Keystone
+  const pageLinks: PageLinkItem[] = [
+    {
+      name: 'Executive Dashboard',
+      desc: 'Real-time KPIs, active orders & SLA metrics',
+      route: '/dashboard',
+      icon: LayoutDashboard,
+      defaultRole: 'MANAGER',
+      defaultEmail: 'admin@vertexa.com',
+      badge: 'Admin',
+    },
+    {
+      name: 'Work Orders Manager',
+      desc: 'Search, filter, assign and manage all work orders',
+      route: '/work-orders',
+      icon: ClipboardList,
+      defaultRole: 'MANAGER',
+      defaultEmail: 'admin@vertexa.com',
+      badge: 'Core',
+    },
+    {
+      name: 'Create Work Order',
+      desc: 'Issue a new service or emergency work order',
+      route: '/work-orders/new',
+      icon: PlusCircle,
+      defaultRole: 'MANAGER',
+      defaultEmail: 'admin@vertexa.com',
+      badge: 'New',
+    },
+    {
+      name: 'Kanban Dispatch Board',
+      desc: 'Interactive drag & drop dispatching pipeline',
+      route: '/kanban',
+      icon: Columns3,
+      defaultRole: 'DISPATCHER',
+      defaultEmail: 'sarah@vertexa.com',
+      badge: 'Dispatch',
+    },
+    {
+      name: 'Technician My Jobs',
+      desc: 'Field view for active tickets, parts & time logs',
+      route: '/my-jobs',
+      icon: Wrench,
+      defaultRole: 'TECHNICIAN',
+      defaultEmail: 'mike@vertexa.com',
+      badge: 'Field Tech',
+    },
+    {
+      name: 'Customer Portal',
+      desc: 'Client self-service dashboard & status tracker',
+      route: '/portal',
+      icon: Building2,
+      defaultRole: 'CUSTOMER',
+      defaultEmail: 'john@apex.com',
+      badge: 'Client',
+    },
+    {
+      name: 'Submit Service Request',
+      desc: 'Customer request submission portal',
+      route: '/portal/requests',
+      icon: PlusCircle,
+      defaultRole: 'CUSTOMER',
+      defaultEmail: 'john@apex.com',
+      badge: 'Client',
+    },
+    {
+      name: 'Customer Organizations',
+      desc: 'Client directory, contracts & active sites',
+      route: '/customers',
+      icon: Building,
+      defaultRole: 'MANAGER',
+      defaultEmail: 'admin@vertexa.com',
+    },
+    {
+      name: 'Facilities & Sites',
+      desc: 'Building locations, addresses & equipment mapping',
+      route: '/sites',
+      icon: Compass,
+      defaultRole: 'MANAGER',
+      defaultEmail: 'admin@vertexa.com',
+    },
+    {
+      name: 'Spare Parts & Inventory',
+      desc: 'Stock levels, unit pricing & parts catalog',
+      route: '/parts',
+      icon: Package,
+      defaultRole: 'MANAGER',
+      defaultEmail: 'admin@vertexa.com',
+    },
+    {
+      name: 'Analytics & SLA Reports',
+      desc: 'Performance reports, resolution time & compliance',
+      route: '/reports',
+      icon: BarChart3,
+      defaultRole: 'MANAGER',
+      defaultEmail: 'admin@vertexa.com',
+      badge: 'Metrics',
+    },
+    {
+      name: 'User & Team Management',
+      desc: 'Manage technicians, dispatchers and managers',
+      route: '/users',
+      icon: UserCog,
+      defaultRole: 'MANAGER',
+      defaultEmail: 'admin@vertexa.com',
+      badge: 'Security',
+    },
+    {
+      name: 'Live Notifications Hub',
+      desc: 'SLA alerts, assignment notifications & activity log',
+      route: '/notifications',
+      icon: Bell,
+      defaultRole: 'MANAGER',
+      defaultEmail: 'admin@vertexa.com',
+    },
+  ];
+
+  const handleDirectAccess = async (
+    id: string,
+    email: string,
+    role: UserRole,
+    route: string,
+    name: string,
+    customerId?: number
+  ) => {
+    setLoadingId(id);
+    setActivePersona(id);
+    try {
+      await loginAs(email, 'password123', {
+        id: customerId || 1,
+        name: name,
+        email: email,
+        role: role,
+        customerId: customerId,
+      });
+      toast.success(`Accessing ${name}...`);
+      navigate(route);
+    } catch {
+      toast.success(`Redirecting to ${route}...`);
+      navigate(route);
+    } finally {
+      setLoadingId(null);
     }
-    navigate(page.to);
   };
 
-  const handleRoleSelect = async (role: UserRole) => {
-    await switchToRole(role);
+  const getPersonaStyle = (item: PersonaItem) => {
+    const isActive = activePersona === item.id;
+    if (item.colorTheme === 'blue') {
+      return 'bg-blue-900/30 border-blue-500/60 text-blue-300 hover:bg-blue-800/40 shadow-lg shadow-blue-500/10';
+    }
+    if (item.colorTheme === 'emerald') {
+      return 'bg-emerald-950/40 border-emerald-500/50 text-emerald-300 hover:bg-emerald-900/40 shadow-lg shadow-emerald-500/10';
+    }
+    if (item.colorTheme === 'purple') {
+      return 'bg-purple-950/30 border-purple-500/50 text-purple-300 hover:bg-purple-900/40';
+    }
+    return isActive
+      ? 'bg-[#18233d] border-blue-400 text-white shadow-md'
+      : 'bg-[#0f172a]/90 border-slate-800 text-slate-200 hover:border-slate-600 hover:bg-[#16213b]';
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-accent-500 selection:text-white relative overflow-hidden flex flex-col">
-      {/* Dynamic Background Glows */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-40 left-1/4 w-[600px] h-[600px] bg-accent-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-1/2 -right-40 w-[500px] h-[500px] bg-emerald-500/8 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 left-1/3 w-[500px] h-[500px] bg-indigo-500/10 rounded-full blur-3xl" />
-      </div>
+    <div className="min-h-screen bg-[#0a0f1d] text-white flex flex-col justify-between relative overflow-hidden selection:bg-accent-500 selection:text-white">
+      {/* Background glow effects */}
+      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-blue-600/10 rounded-full blur-3xl pointer-events-none -translate-y-1/2" />
+      <div className="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-emerald-600/10 rounded-full blur-3xl pointer-events-none translate-y-1/2" />
 
-      {/* Top Navbar */}
-      <header className="relative z-20 border-b border-white/10 bg-slate-900/60 backdrop-blur-xl px-6 lg:px-12 py-4">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 bg-gradient-to-br from-accent-400 via-accent-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-accent-500/25">
-              <span className="text-white font-black text-xl tracking-tight">K</span>
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-white font-extrabold text-xl tracking-tight">KEYSTONE</h1>
-                <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Direct Access Mode
-                </span>
-              </div>
-              <p className="text-slate-400 text-[11px] tracking-wider uppercase font-medium">
-                Vertexa Facility Solutions Pvt. Ltd.
-              </p>
-            </div>
+      {/* Header Bar */}
+      <header className="relative z-10 border-b border-slate-800/80 bg-[#0d1424]/80 backdrop-blur-md px-6 lg:px-12 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/25">
+            <span className="text-white font-extrabold text-xl">K</span>
           </div>
+          <div>
+            <h1 className="text-white font-black text-xl tracking-tight leading-none">KEYSTONE</h1>
+            <p className="text-slate-400 text-[10px] tracking-[0.2em] uppercase font-semibold mt-0.5">
+              Vertexa Facility Solutions
+            </p>
+          </div>
+        </div>
 
-          {/* Quick Active Persona Switcher */}
-          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl p-1.5">
-            <span className="text-xs text-slate-400 px-2 font-medium hidden md:inline">
-              Active Persona:
-            </span>
-            {(['MANAGER', 'DISPATCHER', 'TECHNICIAN', 'CUSTOMER'] as UserRole[]).map((r) => {
-              const active = user?.role === r;
-              const demo = DEMO_ACCOUNTS[r];
+        <div className="flex items-center gap-2 text-xs text-slate-400 bg-slate-800/60 border border-slate-700/60 px-3 py-1.5 rounded-full">
+          <Sparkles size={14} className="text-blue-400" />
+          <span>One-Click Instant Access Active</span>
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="relative z-10 max-w-6xl w-full mx-auto px-4 py-8 lg:py-12 flex-1 flex flex-col justify-center">
+        {/* Title Header */}
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-3">
+            <ShieldCheck size={14} /> Direct Page & Role Access
+          </div>
+          <h2 className="text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+            Select Your Role or Page
+          </h2>
+          <p className="text-slate-400 text-sm sm:text-base mt-2">
+            Click any button below to immediately open the corresponding page without requiring a password or login box.
+          </p>
+        </div>
+
+        {/* Primary Role Selector Cards (Styled exactly like user screenshot) */}
+        <div className="mb-10">
+          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-blue-400"></span> Quick Login Personas
+          </h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+            {personas.map((persona) => {
+              const Icon = persona.icon;
+              const isLoading = loadingId === persona.id;
+
               return (
                 <button
-                  key={r}
-                  onClick={() => handleRoleSelect(r)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    active
-                      ? 'bg-accent-500 text-white shadow-md shadow-accent-500/30'
-                      : 'text-slate-300 hover:text-white hover:bg-white/5'
-                  }`}
-                  title={`Switch to ${demo.name} (${r})`}
+                  key={persona.id}
+                  onClick={() =>
+                    handleDirectAccess(
+                      persona.id,
+                      persona.email,
+                      persona.role,
+                      persona.route,
+                      persona.name,
+                      persona.customerId
+                    )
+                  }
+                  disabled={loadingId !== null}
+                  className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border transition-all duration-200 text-left group hover:scale-[1.01] active:scale-[0.99] ${getPersonaStyle(
+                    persona
+                  )}`}
                 >
-                  {r.charAt(0) + r.slice(1).toLowerCase()}
+                  <div className="flex items-center gap-3.5 min-w-0">
+                    <div className="w-10 h-10 rounded-lg bg-black/20 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                      {isLoading ? (
+                        <Loader2 size={18} className="animate-spin text-white" />
+                      ) : (
+                        <Icon size={20} />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-bold text-sm text-white truncate group-hover:text-blue-200 transition-colors">
+                        {persona.name}
+                      </p>
+                      <p className="text-xs opacity-70 truncate mt-0.5">{persona.subtitle}</p>
+                    </div>
+                  </div>
+                  <ArrowRight
+                    size={16}
+                    className="opacity-40 group-hover:opacity-100 group-hover:translate-x-1 transition-all flex-shrink-0 ml-2"
+                  />
                 </button>
               );
             })}
           </div>
         </div>
-      </header>
 
-      {/* Hero Section */}
-      <main className="relative z-10 flex-1 max-w-7xl mx-auto w-full px-6 lg:px-12 py-10">
-        <div className="text-center max-w-3xl mx-auto mb-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-300 text-xs font-semibold mb-4 shadow-sm">
-            <Sparkles size={14} className="text-accent-400" />
-            <span>Select any module below to open it immediately</span>
-          </div>
-          <h2 className="text-3xl lg:text-4xl font-black text-white tracking-tight leading-tight mb-3">
-            Keystone Platform Navigator
-          </h2>
-          <p className="text-slate-400 text-base leading-relaxed">
-            Click on any page card below to launch that interface directly without needing to enter credentials.
-          </p>
-        </div>
+        {/* Direct Page Links Grid */}
+        <div>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400"></span> Direct Page Links & Modules
+          </h3>
 
-        {/* Feature Highlights Banner */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
-          {[
-            { label: 'Work Orders & SLAs', value: 'Live Tracking', icon: Shield, color: 'text-blue-400' },
-            { label: 'Drag & Drop Kanban', value: '6 Stages', icon: Layers, color: 'text-purple-400' },
-            { label: 'Technician Tools', value: 'Time & Parts', icon: Clock, color: 'text-amber-400' },
-            { label: 'Direct Access', value: 'No Login Required', icon: CheckCircle2, color: 'text-emerald-400' },
-          ].map((item, idx) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={idx}
-                className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-3 backdrop-blur-md"
-              >
-                <div className={`p-2.5 rounded-lg bg-white/5 ${item.color}`}>
-                  <Icon size={20} />
-                </div>
-                <div>
-                  <p className="text-slate-400 text-[11px] font-medium">{item.label}</p>
-                  <p className="text-white text-sm font-bold">{item.value}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+            {pageLinks.map((item) => {
+              const Icon = item.icon;
+              const isLoading = loadingId === item.route;
 
-        {/* Section Heading */}
-        <div className="flex items-center justify-between mb-6 pb-3 border-b border-white/10">
-          <div className="flex items-center gap-2">
-            <Layers size={18} className="text-accent-400" />
-            <h3 className="text-lg font-bold text-white tracking-tight">Available Pages ({PAGES.length})</h3>
-          </div>
-          <p className="text-xs text-slate-400 hidden sm:block">Click any card to launch</p>
-        </div>
-
-        {/* Pages Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mb-12">
-          {PAGES.map((page) => (
-            <div
-              key={page.to}
-              onClick={() => handleOpenPage(page)}
-              className="group bg-slate-900/70 hover:bg-slate-900 border border-white/10 hover:border-accent-500/50 rounded-2xl p-5 transition-all duration-200 hover:shadow-xl hover:shadow-accent-500/10 hover:-translate-y-0.5 cursor-pointer flex flex-col justify-between"
-            >
-              <div>
-                {/* Header: Icon + Badge + Route */}
-                <div className="flex items-start justify-between gap-3 mb-4">
-                  <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center border transition-transform group-hover:scale-110 ${page.iconBg} ${page.iconColor}`}
-                  >
-                    {page.icon}
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span
-                      className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${page.badgeColor}`}
-                    >
-                      {page.badge}
-                    </span>
-                    <span className="text-[11px] font-mono text-slate-500 group-hover:text-slate-400 transition-colors">
-                      {page.to}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Title & Description */}
-                <h4 className="text-white font-bold text-base mb-1.5 group-hover:text-accent-400 transition-colors flex items-center gap-1.5">
-                  {page.title}
-                </h4>
-                <p className="text-slate-400 text-xs leading-relaxed mb-4">
-                  {page.description}
-                </p>
-              </div>
-
-              {/* Action Button */}
-              <div className="pt-3 border-t border-white/5 flex items-center justify-between">
-                <span className="text-[11px] text-slate-500 font-medium">
-                  {page.targetRole ? `Persona: ${page.targetRole}` : 'Open directly'}
-                </span>
+              return (
                 <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleOpenPage(page);
-                  }}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/5 group-hover:bg-accent-500 text-slate-200 group-hover:text-white text-xs font-semibold transition-all"
+                  key={item.route}
+                  onClick={() =>
+                    handleDirectAccess(
+                      item.route,
+                      item.defaultEmail,
+                      item.defaultRole,
+                      item.route,
+                      item.name
+                    )
+                  }
+                  disabled={loadingId !== null}
+                  className="flex flex-col justify-between p-4 rounded-xl bg-[#0e1629]/90 border border-slate-800/80 hover:border-blue-500/50 hover:bg-[#141f38] transition-all duration-200 text-left group hover:shadow-lg hover:shadow-blue-500/5 hover:-translate-y-0.5"
                 >
-                  <span>Open Page</span>
-                  <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+                  <div>
+                    <div className="flex items-center justify-between mb-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-all">
+                        {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Icon size={16} />}
+                      </div>
+                      {item.badge && (
+                        <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
+                    <h4 className="font-bold text-sm text-white group-hover:text-blue-300 transition-colors">
+                      {item.name}
+                    </h4>
+                    <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
+                      {item.desc}
+                    </p>
+                  </div>
+
+                  <div className="mt-4 pt-2.5 border-t border-slate-800/60 flex items-center justify-between text-xs text-blue-400 font-medium">
+                    <span>Open Page</span>
+                    <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </button>
-              </div>
-            </div>
-          ))}
+              );
+            })}
+          </div>
         </div>
       </main>
 
       {/* Footer */}
-      <footer className="relative z-20 border-t border-white/10 bg-slate-900/40 py-6 px-6 text-center text-xs text-slate-500">
-        <p>&copy; {new Date().getFullYear()} Vertexa Facility Solutions Pvt. Ltd. All rights reserved.</p>
+      <footer className="relative z-10 border-t border-slate-800/60 py-4 text-center text-xs text-slate-400">
+        &copy; {new Date().getFullYear()} Vertexa Facility Solutions Pvt. Ltd. — KEYSTONE Enterprise Platform
       </footer>
     </div>
   );

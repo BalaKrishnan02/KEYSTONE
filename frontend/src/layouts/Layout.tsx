@@ -29,18 +29,17 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { to: '/', label: 'Navigation Hub', icon: <Home size={20} />, roles: ['ALL'] },
   { to: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} />, roles: ['MANAGER', 'DISPATCHER'] },
-  { to: '/work-orders', label: 'Work Orders', icon: <ClipboardList size={20} />, roles: ['MANAGER', 'DISPATCHER', 'TECHNICIAN', 'CUSTOMER'] },
-  { to: '/kanban', label: 'Kanban Board', icon: <Columns3 size={20} />, roles: ['MANAGER', 'DISPATCHER'] },
-  { to: '/my-jobs', label: 'My Jobs', icon: <Wrench size={20} />, roles: ['TECHNICIAN', 'MANAGER'] },
   { to: '/customers', label: 'Customers', icon: <Users size={20} />, roles: ['MANAGER', 'DISPATCHER'] },
   { to: '/sites', label: 'Sites', icon: <Building2 size={20} />, roles: ['MANAGER', 'DISPATCHER'] },
-  { to: '/parts', label: 'Parts Inventory', icon: <Package size={20} />, roles: ['MANAGER', 'DISPATCHER', 'TECHNICIAN'] },
+  { to: '/work-orders', label: 'Work Orders', icon: <ClipboardList size={20} />, roles: ['MANAGER', 'DISPATCHER'] },
+  { to: '/kanban', label: 'Kanban Board', icon: <Columns3 size={20} />, roles: ['MANAGER', 'DISPATCHER'] },
+  { to: '/parts', label: 'Parts', icon: <Package size={20} />, roles: ['MANAGER', 'DISPATCHER', 'TECHNICIAN'] },
   { to: '/reports', label: 'Reports', icon: <BarChart3 size={20} />, roles: ['MANAGER', 'DISPATCHER'] },
-  { to: '/users', label: 'User Management', icon: <UserCog size={20} />, roles: ['MANAGER'] },
-  { to: '/portal', label: 'Customer Portal', icon: <ClipboardList size={20} />, roles: ['CUSTOMER', 'MANAGER'] },
-  { to: '/portal/requests', label: 'New Request', icon: <Building2 size={20} />, roles: ['CUSTOMER', 'MANAGER'] },
+  { to: '/users', label: 'Users', icon: <UserCog size={20} />, roles: ['MANAGER'] },
+  { to: '/my-jobs', label: 'My Jobs', icon: <Wrench size={20} />, roles: ['TECHNICIAN'] },
+  { to: '/portal', label: 'My Requests', icon: <ClipboardList size={20} />, roles: ['CUSTOMER'] },
+  { to: '/portal/requests', label: 'New Request', icon: <Home size={20} />, roles: ['CUSTOMER'] },
 ];
 
 const pageTitles: Record<string, string> = {
@@ -93,7 +92,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     setSidebarOpen(false);
   }, [location.pathname]);
 
-  const filteredItems = navItems;
+  const filteredItems = navItems.filter((item) => user && item.roles.includes(user.role));
   const currentPage = pageTitles[location.pathname] || 'KEYSTONE';
 
   const SidebarContent = () => (
@@ -217,6 +216,16 @@ export default function Layout({ children }: { children: ReactNode }) {
                 aria-label="Search"
               />
             </div>
+
+            {/* Switch Persona / Launchpad Hub Button */}
+            <NavLink
+              to="/login"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-50 text-accent-700 hover:bg-accent-100 border border-accent-200 text-xs font-semibold transition-all shadow-sm"
+              title="Return to Role & Page Launchpad"
+            >
+              <Users size={14} />
+              <span className="hidden sm:inline">Switch Role / Pages</span>
+            </NavLink>
 
             {/* Notification bell */}
             <NavLink

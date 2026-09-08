@@ -1,0 +1,142 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+      },
+      colors: {
+        /* ── Semantic palette from FSM design spec ── */
+        success: {
+          50:  '#EAF3DE',
+          100: '#D5E7BD',
+          200: '#B0CF7B',
+          300: '#7DB13A',
+          400: '#4E8A15',
+          500: '#3B6D11',
+          600: '#27500A',
+          700: '#1E3F08',
+          DEFAULT: '#3B6D11',
+        },
+        accent: {
+          50:  '#E6F1FB',
+          100: '#CCE3F7',
+          200: '#99C7EF',
+          300: '#5AA3E3',
+          400: '#2B7FD4',
+          500: '#185FA5',
+          600: '#0C447C',
+          700: '#0A3763',
+          DEFAULT: '#185FA5',
+        },
+        warning: {
+          50:  '#FAEEDA',
+          100: '#F5DDB5',
+          200: '#EBBB6B',
+          300: '#D89A2C',
+          400: '#A87617',
+          500: '#854F0B',
+          600: '#633806',
+          700: '#4D2B05',
+          DEFAULT: '#854F0B',
+        },
+        danger: {
+          50:  '#FCEBEB',
+          100: '#F9D7D7',
+          200: '#F2AFAF',
+          300: '#E87C7C',
+          400: '#D14E4E',
+          500: '#A32D2D',
+          600: '#791F1F',
+          700: '#5E1818',
+          DEFAULT: '#A32D2D',
+        },
+        neutral: {
+          50:  '#F1EFE8',
+          100: '#E3E1D9',
+          200: '#D0CEC5',
+          300: '#B4B2A9',
+          400: '#8A887F',
+          500: '#5F5E5A',
+          600: '#444441',
+          700: '#2C2C2A',
+          DEFAULT: '#5F5E5A',
+        },
+        /* ── Surface / background tokens ── */
+        surface: {
+          1: '#F5F5F5',
+          2: '#FFFFFF',
+          3: '#FAFAF8',
+          sidebar: '#1C1C1A',
+        },
+        /* ── Keep keystone for backward compat during migration ── */
+        keystone: {
+          50:  '#E6F1FB',
+          100: '#CCE3F7',
+          200: '#99C7EF',
+          300: '#5AA3E3',
+          400: '#2B7FD4',
+          500: '#185FA5',
+          600: '#0C447C',
+          700: '#0A3763',
+          800: '#082D52',
+          900: '#061F3B',
+          950: '#1C1C1A',
+        },
+      },
+      borderRadius: {
+        'control': '6px',
+        'card': '8px',
+        'lg-card': '12px',
+        'pill': '20px',
+      },
+      boxShadow: {
+        'card': '0 2px 8px rgba(0,0,0,0.08)',
+        'card-hover': '0 4px 12px rgba(0,0,0,0.12)',
+        'dialog': '0 4px 16px rgba(0,0,0,0.12)',
+        'sm-subtle': '0 1px 3px rgba(0,0,0,0.06)',
+      },
+      spacing: {
+        '4.5': '18px',
+        '13':  '52px',
+        '15':  '60px',
+        '18':  '72px',
+      },
+      fontSize: {
+        'h1': ['22px', { lineHeight: '28px', fontWeight: '500' }],
+        'h2': ['18px', { lineHeight: '24px', fontWeight: '500' }],
+        'h3': ['16px', { lineHeight: '22px', fontWeight: '500' }],
+        'h4': ['14px', { lineHeight: '20px', fontWeight: '500' }],
+        'body': ['14px', { lineHeight: '20px', fontWeight: '400' }],
+        'label': ['13px', { lineHeight: '18px', fontWeight: '500' }],
+        'caption': ['12px', { lineHeight: '16px', fontWeight: '400' }],
+        'btn': ['13px', { lineHeight: '18px', fontWeight: '500' }],
+        'badge': ['11px', { lineHeight: '14px', fontWeight: '600' }],
+      },
+      animation: {
+        'fade-in': 'fadeIn 0.2s ease-out',
+        'slide-up': 'slideUp 0.25s ease-out',
+        'slide-in-right': 'slideInRight 0.3s ease-out',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%':   { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%':   { opacity: '0', transform: 'translateY(8px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        slideInRight: {
+          '0%':   { opacity: '0', transform: 'translateX(-12px)' },
+          '100%': { opacity: '1', transform: 'translateX(0)' },
+        },
+      },
+    },
+  },
+  plugins: [],
+}

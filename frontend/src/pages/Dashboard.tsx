@@ -58,24 +58,26 @@ export default function Dashboard() {
     );
   }
 
-  const statusChartData = Object.entries(data.workOrdersByStatus).map(([name, value]) => ({
+  const statusChartData = Object.entries(data.workOrdersByStatus || {}).map(([name, value]) => ({
     name: name.replace(/_/g, ' '),
     count: value,
   }));
 
-  const priorityChartData = Object.entries(data.workOrdersByPriority).map(([name, value]) => ({
+  const priorityChartData = Object.entries(data.workOrdersByPriority || {}).map(([name, value]) => ({
     name,
     value,
   }));
 
-  const techChartData = data.workOrdersByTechnician.map((t) => ({
-    name: t.technicianName.split(' ')[0],
-    count: t.workOrderCount,
+  const techChartData = (data.workOrdersByTechnician || []).map((t) => ({
+    name: t?.technicianName ? t.technicianName.split(' ')[0] : 'Tech',
+    count: t?.workOrderCount || 0,
   }));
 
-  const slaAlerts = data.recentWorkOrders.filter(
-    (wo) => wo.slaState === 'AT_RISK' || wo.slaState === 'BREACHED'
+  const slaAlerts = (data.recentWorkOrders || []).filter(
+    (wo) => wo?.slaState === 'AT_RISK' || wo?.slaState === 'BREACHED'
   );
+
+  const slaPercent = data.slaCompliancePercent ?? 0;
 
   return (
     <div className="space-y-6">
@@ -83,25 +85,25 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <KPICard
           label="Total Work Orders"
-          value={data.totalWorkOrders}
+          value={data.totalWorkOrders ?? 0}
           icon={<ClipboardList size={18} />}
           color="accent"
         />
         <KPICard
           label="Open Work Orders"
-          value={data.openWorkOrders}
+          value={data.openWorkOrders ?? 0}
           icon={<Clock size={18} />}
           color="warning"
         />
         <KPICard
           label="Completed"
-          value={data.completedWorkOrders}
+          value={data.completedWorkOrders ?? 0}
           icon={<CheckCircle2 size={18} />}
           color="success"
         />
         <KPICard
           label="Overdue"
-          value={data.overdueWorkOrders}
+          value={data.overdueWorkOrders ?? 0}
           icon={<AlertCircle size={18} />}
           color="danger"
         />
@@ -115,11 +117,11 @@ export default function Dashboard() {
             </div>
           </div>
           <p className="text-2xl font-bold text-neutral-700 tracking-tight">
-            {data.slaCompliancePercent.toFixed(1)}%
+            {slaPercent.toFixed(1)}%
           </p>
           <ProgressBar
-            value={data.slaCompliancePercent}
-            color={data.slaCompliancePercent >= 90 ? 'success' : data.slaCompliancePercent >= 70 ? 'warning' : 'danger'}
+            value={slaPercent}
+            color={slaPercent >= 90 ? 'success' : slaPercent >= 70 ? 'warning' : 'danger'}
             size="md"
           />
         </div>

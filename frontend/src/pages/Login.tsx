@@ -17,6 +17,7 @@ import { UserRole } from '../types';
 
 interface PersonaItem {
   id: string;
+  userId: number;
   name: string;
   subtitle: string;
   email: string;
@@ -37,6 +38,7 @@ export default function Login() {
   const personas: PersonaItem[] = [
     {
       id: 'admin',
+      userId: 1,
       name: 'Admin / Facility Manager',
       subtitle: 'Full System Control & Management',
       email: 'admin@vertexa.com',
@@ -47,6 +49,7 @@ export default function Login() {
     },
     {
       id: 'apex',
+      userId: 6,
       name: 'Apex Commercial Towers',
       subtitle: 'Client Portal & Service Requests',
       email: 'john@apex.com',
@@ -58,6 +61,7 @@ export default function Login() {
     },
     {
       id: 'dispatcher',
+      userId: 2,
       name: 'Operations Dispatcher',
       subtitle: 'Sarah Jenkins • Work Order Dispatch',
       email: 'sarah@vertexa.com',
@@ -68,6 +72,7 @@ export default function Login() {
     },
     {
       id: 'tech_mike',
+      userId: 3,
       name: 'Field Tech • Mike Ramirez',
       subtitle: 'HVAC & Electrical Specialist',
       email: 'mike@vertexa.com',
@@ -78,6 +83,7 @@ export default function Login() {
     },
     {
       id: 'tech_alex',
+      userId: 4,
       name: 'Field Tech • Alex Rivera',
       subtitle: 'Field Operations & Maintenance',
       email: 'alex@vertexa.com',
@@ -88,6 +94,7 @@ export default function Login() {
     },
     {
       id: 'nexus',
+      userId: 7,
       name: 'Nexus Innovation Park',
       subtitle: 'Client Portal • Lab Complex',
       email: 'elena@nexuspark.com',
@@ -99,29 +106,22 @@ export default function Login() {
     },
   ];
 
-  const handleDirectAccess = async (
-    id: string,
-    email: string,
-    role: UserRole,
-    route: string,
-    name: string,
-    customerId?: number
-  ) => {
-    setLoadingId(id);
-    setActivePersona(id);
+  const handleDirectAccess = async (persona: PersonaItem) => {
+    setLoadingId(persona.id);
+    setActivePersona(persona.id);
     try {
-      await loginAs(email, 'password123', {
-        id: customerId || 1,
-        name: name,
-        email: email,
-        role: role,
-        customerId: customerId,
+      await loginAs(persona.email, 'password123', {
+        id: persona.userId,
+        name: persona.name,
+        email: persona.email,
+        role: persona.role,
+        customerId: persona.customerId,
       });
-      toast.success(`Accessing ${name}...`);
-      navigate(route);
+      toast.success(`Accessing ${persona.name}...`);
+      navigate(persona.route);
     } catch {
-      toast.success(`Redirecting to ${route}...`);
-      navigate(route);
+      toast.success(`Redirecting to ${persona.route}...`);
+      navigate(persona.route);
     } finally {
       setLoadingId(null);
     }
@@ -194,16 +194,7 @@ export default function Login() {
               return (
                 <button
                   key={persona.id}
-                  onClick={() =>
-                    handleDirectAccess(
-                      persona.id,
-                      persona.email,
-                      persona.role,
-                      persona.route,
-                      persona.name,
-                      persona.customerId
-                    )
-                  }
+                  onClick={() => handleDirectAccess(persona)}
                   disabled={loadingId !== null}
                   className={`flex items-center justify-between p-4 rounded-xl border transition-all duration-200 text-left group hover:scale-[1.01] active:scale-[0.99] ${getPersonaStyle(
                     persona

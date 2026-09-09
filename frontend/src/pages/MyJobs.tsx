@@ -72,7 +72,8 @@ export default function MyJobs() {
   const inProgress = allJobs.filter((wo) => wo.status === 'IN_PROGRESS').length;
   const onHold = allJobs.filter((wo) => wo.status === 'ON_HOLD').length;
   const completedToday = allJobs.filter((wo) => {
-    if (wo.status !== 'COMPLETED' || !wo.completedAt) return false;
+    if (wo.status !== 'COMPLETED') return false;
+    if (!wo.completedAt) return true;
     const completed = new Date(wo.completedAt);
     const today = new Date();
     return (
@@ -124,6 +125,7 @@ export default function MyJobs() {
       });
       toast.success('Time logged');
       setTimeModalWoId(null);
+      loadJobs();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to log time');
     } finally {
@@ -154,6 +156,7 @@ export default function MyJobs() {
       });
       toast.success('Part added');
       setPartModalWoId(null);
+      loadJobs();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to add part');
     } finally {

@@ -155,7 +155,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <div className={`flex items-center gap-3 px-3 py-2 ${collapsed ? 'justify-center' : ''}`}>
             <div className="w-8 h-8 bg-gradient-to-br from-accent-400 to-accent-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
               <span className="text-white text-xs font-bold">
-                {user.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)}
+                {(user?.name || 'User').split(' ').filter(Boolean).map((n) => n[0]).join('').toUpperCase().slice(0, 2)}
               </span>
             </div>
             {!collapsed && (
@@ -259,7 +259,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               </div>
               <div className="w-8 h-8 bg-gradient-to-br from-accent-400 to-accent-600 rounded-full flex items-center justify-center shadow-sm">
                 <span className="text-white text-xs font-bold">
-                  {user?.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)}
+                  {(user?.name || 'User').split(' ').filter(Boolean).map((n) => n[0]).join('').toUpperCase().slice(0, 2)}
                 </span>
               </div>
             </div>

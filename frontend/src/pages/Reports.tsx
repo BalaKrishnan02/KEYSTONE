@@ -63,21 +63,21 @@ export default function Reports() {
   useEffect(() => { load(); }, [load]);
 
   const statusChartData = report
-    ? Object.entries(report.workOrdersByStatus).map(([name, value]) => ({
+    ? Object.entries(report.workOrdersByStatus || {}).map(([name, value]) => ({
         name: name.replace(/_/g, ' '),
         count: value,
       }))
     : [];
 
   const priorityChartData = report
-    ? Object.entries(report.workOrdersByPriority).map(([name, value]) => ({
+    ? Object.entries(report.workOrdersByPriority || {}).map(([name, value]) => ({
         name,
         value,
       }))
     : [];
 
   const customerChartData = report
-    ? Object.entries(report.workOrdersByCustomer).map(([name, value]) => ({
+    ? Object.entries(report.workOrdersByCustomer || {}).map(([name, value]) => ({
         name,
         count: value,
       }))

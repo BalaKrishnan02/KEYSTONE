@@ -230,7 +230,7 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-50">
-                {data.recentWorkOrders.slice(0, 10).map((wo: WorkOrder) => (
+                {(data.recentWorkOrders || []).slice(0, 10).map((wo: WorkOrder) => (
                   <tr key={wo.id} className="table-row">
                     <td className="py-3 pl-0">
                       <Link to={`/work-orders/${wo.id}`} className="text-accent-600 hover:text-accent-700 font-medium">

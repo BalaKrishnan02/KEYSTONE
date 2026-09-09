@@ -34,7 +34,7 @@
    - Write [application-h2.yml](file:///d:/open%20box/backend/src/main/resources/application-h2.yml).
 
 2. **Run Backend**:
-   - Run backend in the background using command: ./mvnw spring-boot:run "-Dspring-boot.run.profiles=h2"
+   - Run backend in the background using command: ./mvnw spring-boot:run "-Dspring-boot.run.profiles=h2" 
 
 3. **Install & Run Frontend**:
    - In frontend directory, run `npm install`.

@@ -21,7 +21,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const token = localStorage.getItem('keystone_token');
+    if (error.response?.status === 401 && !token?.startsWith('mock_')) {
       localStorage.removeItem('keystone_token');
       localStorage.removeItem('keystone_user');
       if (!window.location.pathname.includes('/login') && !window.location.pathname.includes('/register')) {

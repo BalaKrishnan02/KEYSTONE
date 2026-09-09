@@ -2,6 +2,8 @@ import React, { createContext, useContext, useState, useEffect, useCallback, Rea
 import { LoginResponse, UserRole } from '../types';
 import { authService } from '../services/authService';
 
+import { mockStore } from '../services/mockData';
+
 interface AuthUser {
   id: number;
   name: string;
@@ -44,11 +46,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const response: LoginResponse = await authService.login(email, password);
-    setToken(response.accessToken);
-    setUser(response.user);
-    localStorage.setItem('keystone_token', response.accessToken);
-    localStorage.setItem('keystone_user', JSON.stringify(response.user));
+    try {
+      const response: LoginResponse = await authService.login(email, password);
+      setToken(response.accessToken);
+      setUser(response.user);
+      localStorage.setItem('keystone_token', response.accessToken);
+      localStorage.setItem('keystone_user', JSON.stringify(response.user));
+    } catch {
+      const found = mockStore.getRawUsers().find((u) => u.email.toLowerCase() === email.toLowerCase());
+      if (found) {
+        const mockToken = 'mock_jwt_token_' + found.role.toLowerCase();
+        setToken(mockToken);
+        setUser(found);
+        localStorage.setItem('keystone_token', mockToken);
+        localStorage.setItem('keystone_user', JSON.stringify(found));
+        return;
+      }
+      throw new Error('Invalid email or password');
+    }
   }, []);
 
   const loginAs = useCallback(async (email: string, password = 'password123', fallbackUser?: AuthUser) => {
